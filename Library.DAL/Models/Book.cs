@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Library.DAL.Models;
 
@@ -8,6 +9,9 @@ public partial class Book
     public int Id { get; set; }
 
     public string Name { get; set; } = null!;
+
+    [StringLength(400)]
+    public string? Genre { get; set; }
 
     public int AutorId { get; set; }
 

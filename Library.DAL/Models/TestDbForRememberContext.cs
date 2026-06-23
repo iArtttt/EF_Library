@@ -130,7 +130,7 @@ public partial class TestDbForRememberContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Email)
-                .HasMaxLength(1)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("EMAIL");
             entity.Property(e => e.Login)

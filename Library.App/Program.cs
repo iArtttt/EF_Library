@@ -1,9 +1,12 @@
-﻿namespace Library.App
+﻿using Library.App.Menus;
+
+namespace Library.App
 {
     internal class Program
     {
         static void Main(string[] args)
         {
+            Menu.Start();
             //var host = CreateHostBuilder(args).Build();
             //host.Run();
         }
