@@ -1,4 +1,5 @@
-﻿using Library.DAL.Models;
+﻿using Library.DAL;
+using Library.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -8,12 +9,12 @@ namespace Library.App.Menus
     internal class Menu
     {
         private static List<Librarian> librarians = new List<Librarian>();
-        private static DbContextOptionsBuilder<TestDbForRememberContext> optionBuilder;
+        private static DbContextOptionsBuilder<LibraryContext> optionBuilder;
 
         public static void Start()
         {
             Init();
-            LibrarianRegistration();
+            //LibrarianRegistration();
             Enterence();
         }
 
@@ -48,7 +49,7 @@ namespace Library.App.Menus
             librarian.Email = email;
 
             librarians.Add(librarian);
-            using var context = new TestDbForRememberContext(optionBuilder.Options);
+            using var context = new LibraryContext(optionBuilder.Options);
             context.Librarians.Add(librarian);
             context.SaveChanges();
         }
@@ -96,10 +97,10 @@ namespace Library.App.Menus
             
             var configuration = configurationBuilder.Build();
 
-            optionBuilder = new DbContextOptionsBuilder<TestDbForRememberContext>();
+            optionBuilder = new DbContextOptionsBuilder<LibraryContext>();
             optionBuilder.UseSqlServer(configuration.GetConnectionString("Default"));
 
-            using var context = new TestDbForRememberContext(optionBuilder.Options);
+            using var context = new LibraryContext(optionBuilder.Options);
 
             librarians = context.Librarians.ToList();
         }

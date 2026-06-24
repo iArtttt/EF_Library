@@ -1,15 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Library.Shared.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
-namespace Library.DAL.Models;
-
-public partial class Librarian
+namespace Library.DAL.Models
 {
-    public int Id { get; set; }
+    public class Librarian : IUser
+    {
+        [Key] 
+        public int Id { get; set; }
 
-    public string Login { get; set; } = null!;
+        [Key]
+        [MaxLength(100)]
+        public string Login { get; set; } = null!;
+        
+        [MaxLength(100)]
+        public string Password { get; set; } = null!;
+        
+        [EmailAddress]
+        [MaxLength(100)]
+        public string? Email { get; set; }
 
-    public string Password { get; set; } = null!;
+        public ICollection<Reader> Readers { get; set; } = new List<Reader>();
 
-    public string? Email { get; set; }
+    }
 }

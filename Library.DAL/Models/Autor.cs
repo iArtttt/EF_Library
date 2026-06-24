@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Library.Shared.Interfaces;
 
-namespace Library.DAL.Models;
-
-public partial class Autor
+namespace Library.DAL.Models
 {
-    public int Id { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    public string Surname { get; set; } = null!;
-
-    public string? SecondName { get; set; }
-
-    public DateTime Birthday { get; set; }
-
-    public virtual ICollection<AutorsBook> AutorsBooks { get; set; } = new List<AutorsBook>();
-
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public class Autor : IPerson
+    {
+        public int Id {  get; set; }
+        public string Name { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+    }
 }
