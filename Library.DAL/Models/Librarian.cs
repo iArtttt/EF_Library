@@ -5,10 +5,8 @@ namespace Library.DAL.Models
 {
     public class Librarian : IUser
     {
-        [Key] 
         public int Id { get; set; }
 
-        [Key]
         [MaxLength(100)]
         public string Login { get; set; } = null!;
         

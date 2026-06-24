@@ -1,7 +1,4 @@
 ﻿using Library.Shared.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Library.Shared.Interfaces
 {

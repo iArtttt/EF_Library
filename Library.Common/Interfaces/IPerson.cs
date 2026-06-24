@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Library.Shared.Interfaces
+﻿namespace Library.Shared.Interfaces
 {
-    public interface IPerson : IID
+    public interface IPerson : IName, ILastName
     {
-        public string Name { get; set; }
-        public string LastName { get; set; }
-
     }
 }

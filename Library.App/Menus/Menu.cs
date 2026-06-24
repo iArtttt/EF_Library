@@ -15,7 +15,7 @@ namespace Library.App.Menus
         {
             Init();
             //LibrarianRegistration();
-            Enterence();
+            //Enterence();
         }
 
         private static void LibrarianRegistration()
@@ -98,7 +98,7 @@ namespace Library.App.Menus
             var configuration = configurationBuilder.Build();
 
             optionBuilder = new DbContextOptionsBuilder<LibraryContext>();
-            optionBuilder.UseSqlServer(configuration.GetConnectionString("Default"));
+            optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
 
             using var context = new LibraryContext(optionBuilder.Options);
 
