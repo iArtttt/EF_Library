@@ -16,6 +16,7 @@ namespace Library.DAL.Models
         public DateTime PublishYear { get; set; }
         public string? Country { get; set; }
         public string? City { get; set; }
+        public int ReturnedDays { get; set; } = 30;
         IPublisherCodeType IBook.PublisherType
         {
             get => PublisherType;
