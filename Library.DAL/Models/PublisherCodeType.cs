@@ -1,4 +1,4 @@
-﻿using Library.Shared.Interfaces;
+﻿using Library.Shared.Interfaces.DAL;
 
 namespace Library.DAL.Models
 {

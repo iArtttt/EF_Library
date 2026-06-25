@@ -1,4 +1,4 @@
-﻿namespace Library.Shared.Interfaces
+﻿namespace Library.Shared.Interfaces.DAL
 {
     public interface IID
     {

@@ -1,6 +1,6 @@
 ﻿using Library.Shared.Enums;
 
-namespace Library.Shared.Interfaces
+namespace Library.Shared.Interfaces.DAL
 {
     public interface IDocument : IID
     {

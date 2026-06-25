@@ -1,6 +1,6 @@
 ﻿using Library.Shared.Enums;
 
-namespace Library.Shared.Interfaces.Complex
+namespace Library.Shared.Interfaces.DAL.Complex
 {
     public interface IBook : IName
     {

@@ -1,5 +1,5 @@
 ﻿using Library.DAL.Models;
-using Library.Shared.Abstraction;
+using Library.Shared.Abstractions;
 using Library.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 

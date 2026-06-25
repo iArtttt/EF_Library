@@ -1,6 +1,6 @@
-﻿using Library.Shared.Abstraction;
+﻿using Library.Shared.Abstractions;
 using Library.Shared.Enums;
-using Library.Shared.Interfaces.Complex;
+using Library.Shared.Interfaces.DAL.Complex;
 
 namespace Library.DAL.Models
 {

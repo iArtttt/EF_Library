@@ -1,4 +1,4 @@
-﻿namespace Library.Shared.Interfaces.Complex
+﻿namespace Library.Shared.Interfaces.DAL.Complex
 {
     public interface IReader : IUser, IPerson, IDocument
     {

@@ -1,21 +1,19 @@
 ﻿using Library.DAL;
 using Library.DAL.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+using Library.Shared.Abstractions;
 
 namespace Library.App.Menus
 {
     internal class Menu
     {
         private static List<Librarian> librarians = new List<Librarian>();
-        private static DbContextOptionsBuilder<LibraryContext> optionBuilder;
+        //private static DbContextOptionsBuilder<LibraryContext> optionBuilder;
 
         public static void Start()
         {
             Init();
             //LibrarianRegistration();
-            //Enterence();
+            Enterance();
         }
 
         private static void LibrarianRegistration()
@@ -49,7 +47,7 @@ namespace Library.App.Menus
             librarian.Email = email;
 
             librarians.Add(librarian);
-            using var context = new LibraryContext(optionBuilder.Options);
+            using var context = new LibraryContext(DbConfig.Options);
             context.Librarians.Add(librarian);
             context.SaveChanges();
         }
@@ -59,48 +57,59 @@ namespace Library.App.Menus
             return Console.ReadLine();
         }
 
-        private static void Enterence()
+        private static void Enterance()
         {
-            bool isExit = false;
-            string? str = string.Empty;
-            do
+            string? login = null;
+            string? password = null;
+
+            login = ToWrite("Write Loggin");
+            password = ToWrite("Write Password");
+
+
+            User? user;
+
+            using (var context = new LibraryContext(DbConfig.Options))
             {
-                Console.WriteLine("Write Loggin");
-                str = Console.ReadLine();
-                if (string.IsNullOrEmpty(str)) 
-                    isExit = true;
-                else
-                {
-                    var librarian = librarians.FirstOrDefault(l => l.Login == str);
+                user = context.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            }
 
-                    if (librarian != null)
-                    {
-                        Console.WriteLine("Write Password");
-                        str = Console.ReadLine();
-                        if (string.IsNullOrEmpty(str) || librarian.Password != str) 
-                            Console.WriteLine("Incorrect Password");
-                        else
-                            Console.WriteLine("YEEEEEEEEEEY");
-                    }
-                    else
-                        Console.WriteLine("Incorrect Loggin");
-                }
 
-            } while (!isExit);
         }
+        //private static void Enterence()
+        //{
+        //    bool isExit = false;
+        //    string? str = string.Empty;
+        //    do
+        //    {
+        //        Console.WriteLine("Write Loggin");
+        //        str = Console.ReadLine();
+        //        if (string.IsNullOrEmpty(str)) 
+        //            isExit = true;
+        //        else
+        //        {
+        //            var librarian = librarians.FirstOrDefault(l => l.Login == str);
+
+        //            if (librarian != null)
+        //            {
+        //                Console.WriteLine("Write Password");
+        //                str = Console.ReadLine();
+        //                if (string.IsNullOrEmpty(str) || librarian.Password != str) 
+        //                    Console.WriteLine("Incorrect Password");
+        //                else
+        //                    Console.WriteLine("YEEEEEEEEEEY");
+        //            }
+        //            else
+        //                Console.WriteLine("Incorrect Loggin");
+        //        }
+
+        //    } while (!isExit);
+        //}
 
         private static void Init()
         {
-            var configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.SetBasePath(Directory.GetCurrentDirectory());
-            configurationBuilder.AddJsonFile("appsettings.json");
             
-            var configuration = configurationBuilder.Build();
 
-            optionBuilder = new DbContextOptionsBuilder<LibraryContext>();
-            optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-
-            using var context = new LibraryContext(optionBuilder.Options);
+            using var context = new LibraryContext(DbConfig.Options);
 
             librarians = context.Librarians.ToList();
         }

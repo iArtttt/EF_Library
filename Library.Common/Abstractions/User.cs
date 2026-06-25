@@ -1,7 +1,7 @@
-﻿using Library.Shared.Interfaces;
+﻿using Library.Shared.Interfaces.DAL;
 using System.ComponentModel.DataAnnotations;
 
-namespace Library.Shared.Abstraction
+namespace Library.Shared.Abstractions
 {
     public abstract class User : IUser
     {

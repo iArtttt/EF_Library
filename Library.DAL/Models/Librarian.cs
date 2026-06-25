@@ -1,4 +1,4 @@
-﻿using Library.Shared.Abstraction;
+﻿using Library.Shared.Abstractions;
 
 namespace Library.DAL.Models
 {

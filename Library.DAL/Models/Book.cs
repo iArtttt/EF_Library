@@ -1,6 +1,6 @@
 ﻿using Library.Shared.Enums;
-using Library.Shared.Interfaces;
-using Library.Shared.Interfaces.Complex;
+using Library.Shared.Interfaces.DAL;
+using Library.Shared.Interfaces.DAL.Complex;
 
 namespace Library.DAL.Models
 {
