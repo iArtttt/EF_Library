@@ -1,33 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using Library.Shared.Enums;
+using Library.Shared.Interfaces.DAL;
+using Library.Shared.Interfaces.DAL.Complex;
 
-namespace Library.DAL.Models;
-
-public partial class Book
+namespace Library.DAL.Models
 {
-    public int Id { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    [StringLength(400)]
-    public string? Genre { get; set; }
-
-    public int AutorId { get; set; }
-
-    public string? PublishCode { get; set; }
-
-    public int CodeTypeId { get; set; }
-
-    public DateTime? Year { get; set; }
-
-    public string? Country { get; set; }
-
-    public string? City { get; set; }
-
-    public virtual Autor Autor { get; set; } = null!;
-
-    public virtual ICollection<AutorsBook> AutorsBooks { get; set; } = new List<AutorsBook>();
-
-    public virtual PublusherType CodeType { get; set; } = null!;
+    public class Book : IBook
+    {
+        public int Id { get; set; }
+        public string Name { get; set;  } = null!;
+        public Genre Genre { get; set; }
+        public int Count { get; set; }
+        public int PublisherTypeId { get; set; }
+        public PublisherCodeType PublisherType { get; set; } = null!;
+        public ICollection<Author> Authors { get; set; } = new List<Author>();
+        public DateTime PublishYear { get; set; }
+        public string? Country { get; set; }
+        public string? City { get; set; }
+        public int ReturnedDays { get; set; } = 30;
+        IPublisherCodeType IBook.PublisherType
+        {
+            get => PublisherType;
+            set => PublisherType = (PublisherCodeType)value;
+        }
+        IEnumerable<IAuthor> IBook.Authors => Authors;
+    }
 }

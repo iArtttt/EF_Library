@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Library.Shared.Abstractions;
 
-namespace Library.DAL.Models;
-
-public partial class Librarian
+namespace Library.DAL.Models
 {
-    public int Id { get; set; }
+    public class Librarian : User
+    {
+        public ICollection<BorrowedBook> ManagedBorrows { get; set; } = new List<BorrowedBook>();
 
-    public string Login { get; set; } = null!;
-
-    public string Password { get; set; } = null!;
-
-    public string? Email { get; set; }
+    }
 }
