@@ -1,11 +1,11 @@
 ﻿namespace Library.Shared.Interfaces.Menus
 {
-    public interface IMenu
+    public interface IMenuElement
     {
         public string Title { get; }
         
         public string? Description { get; }
         
-        public void Do();
+        public void Process();
     }
 }

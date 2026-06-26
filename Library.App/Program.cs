@@ -1,4 +1,4 @@
-﻿using Library.App.Menus;
+﻿using Library.App.Menus.EntityMenu;
 
 namespace Library.App
 {

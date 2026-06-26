@@ -2,12 +2,11 @@
 using Library.DAL.Models;
 using Library.Shared.Abstractions;
 
-namespace Library.App.Menus
+namespace Library.App.Menus.EntityMenu
 {
     internal class Menu
     {
         private static List<Librarian> librarians = new List<Librarian>();
-        //private static DbContextOptionsBuilder<LibraryContext> optionBuilder;
 
         public static void Start()
         {
