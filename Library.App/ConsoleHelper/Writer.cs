@@ -46,6 +46,8 @@
         /// <inheritdoc cref="WriteLine(string, ConsoleColor)"/>
         /// <remarks> Change console color to DarkBlue </remarks>
         public static void WriteLineUnknownDark(this string text) => WriteLine(text, ConsoleColor.DarkBlue);
+        
+        
         /// <summary>
         /// <para>Write text to Console WITHOUT starting a new line</para>
         /// <para>This Method automatically <c>Reset Color</c></para>

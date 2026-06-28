@@ -2,6 +2,6 @@
 {
     public interface ISubMenu : IMenuElement
     {
-        public IEnumerable<IMenuElement> Menus { get; }
+        public IEnumerable<IMenuElement> MenuElements { get; }
     }
 }

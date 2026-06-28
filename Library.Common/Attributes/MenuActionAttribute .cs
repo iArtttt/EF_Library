@@ -7,7 +7,7 @@
         public int Order { get; }
         public string? Description { get; }
 
-        public MenuActionAttribute(string title, int order, string description = null!)
+        public MenuActionAttribute(string title, int order, string? description = null)
         {
             Title = title;
             Order = order;
