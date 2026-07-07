@@ -95,7 +95,7 @@
 
         /// <summary>
         /// <para>Write text to Console and starts a new line</para>
-        /// <para>Use Console.RearLine and return string</para>
+        /// <para>Use Console.ReadLine and return string</para>
         /// <para>This Method automatically <c>Reset Color</c></para>
         /// </summary>
         /// <param name="text">Text to write in Console.</param>
@@ -103,6 +103,19 @@
         {
             if (text != null)
                 WriteLine(text, color);
+            return Console.ReadLine();
+        }
+
+        /// <summary>
+        /// <para>Write text to Console</para>
+        /// <para>Use Console.ReadLine and return string</para>
+        /// <para>This Method automatically <c>Reset Color</c></para>
+        /// </summary>
+        /// <param name="text">Text to write in Console.</param>
+        public static string? Read(this string? text, ConsoleColor color = ConsoleColor.White)
+        {
+            if (text != null)
+                Write(text, color);
             return Console.ReadLine();
         }
     }
