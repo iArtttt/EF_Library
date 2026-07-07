@@ -27,9 +27,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Menus\LibrarianMenu\" />
-    <Folder Include="Menus\ReaderMenu\" />
-  </ItemGroup>
-
 </Project>

@@ -92,5 +92,18 @@
         /// <inheritdoc cref="Write(string, ConsoleColor)"/>
         /// <remarks> Change console color to DarkBlue </remarks>
         public static void WriteUnknownDark(this string text) => Write(text, ConsoleColor.DarkBlue);
+
+        /// <summary>
+        /// <para>Write text to Console and starts a new line</para>
+        /// <para>Use Console.RearLine and return string</para>
+        /// <para>This Method automatically <c>Reset Color</c></para>
+        /// </summary>
+        /// <param name="text">Text to write in Console.</param>
+        public static string? ReadLine(this string? text, ConsoleColor color = ConsoleColor.White)
+        {
+            if (text != null)
+                WriteLine(text, color);
+            return Console.ReadLine();
+        }
     }
 }

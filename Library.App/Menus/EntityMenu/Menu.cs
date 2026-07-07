@@ -31,7 +31,7 @@ namespace Library.App.Menus.EntityMenu
                 Console.Clear();
 
                 $"\n=== {Title} ===\n".WriteLineInfo();
-                "_".PadRight(Console.BufferWidth).WriteLineUnknownDark();
+                string.Empty.PadRight(Console.BufferWidth, '_').WriteLineUnknownDark();
 
                 for (int i = 0; i < _menuElements.Count; i++)
                 {
@@ -100,7 +100,7 @@ namespace Library.App.Menus.EntityMenu
         }
 
         private static Menu DetectMenu<T>() where T : new() => DetectMenu(new Menu("Main Menu"), typeof(T), DbConfig.Options);
-        private static Menu DetectMenu<T>(params object[] values) where T : new()
+        public static Menu DetectMenu<T>(params object[] values) where T : new()
             => DetectMenu(new Menu("Main Menu"), typeof(T), values.Append(DbConfig.Options).ToArray());
 
         private static Menu DetectMenu(Menu newMenu, Type typeMenu, params object[] values)
@@ -202,63 +202,6 @@ namespace Library.App.Menus.EntityMenu
                 {
                     Console.WriteLine(msg);
                     return Console.ReadLine();
-                }
-
-                private static void Enterance()
-                {
-                    string? login = null;
-                    string? password = null;
-
-                    login = ToWrite("Write Loggin");
-                    password = ToWrite("Write Password");
-
-
-                    User? user;
-
-                    using (var context = new LibraryContext(DbConfig.Options))
-                    {
-                        user = context.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
-                    }
-
-
                 }*/
-        //private static void Enterence()
-        //{
-        //    bool isExit = false;
-        //    string? str = string.Empty;
-        //    do
-        //    {
-        //        Console.WriteLine("Write Loggin");
-        //        str = Console.ReadLine();
-        //        if (string.IsNullOrEmpty(str)) 
-        //            isExit = true;
-        //        else
-        //        {
-        //            var librarian = librarians.FirstOrDefault(l => l.Login == str);
-
-        //            if (librarian != null)
-        //            {
-        //                Console.WriteLine("Write Password");
-        //                str = Console.ReadLine();
-        //                if (string.IsNullOrEmpty(str) || librarian.Password != str) 
-        //                    Console.WriteLine("Incorrect Password");
-        //                else
-        //                    Console.WriteLine("YEEEEEEEEEEY");
-        //            }
-        //            else
-        //                Console.WriteLine("Incorrect Loggin");
-        //        }
-
-        //    } while (!isExit);
-        //}
-
-        //private static void Init()
-        //{
-
-
-        //    using var context = new LibraryContext(DbConfig.Options);
-
-        //    librarians = context.Librarians.ToList();
-        //}
     }
 }
