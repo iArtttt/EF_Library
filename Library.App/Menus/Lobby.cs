@@ -30,8 +30,8 @@ namespace Library.App.Menus
                 $"Welcome, {user.Login}!".WriteLineSuccess();
                 Console.ReadKey(true);
 
-                if (user is Librarian librarian) Menu.DetectMenu<LibrarianLobby>(librarian);
-                else if (user is Reader reader)  Menu.DetectMenu<ReaderLobby>(reader);
+                if (user is Librarian librarian) Menu.DetectMenu<LibrarianLobby>(librarian).Process();
+                else if (user is Reader reader)  Menu.DetectMenu<ReaderLobby>(reader).Process();
             }
             else
             {
@@ -139,7 +139,11 @@ namespace Library.App.Menus
         [MenuAction("Exit", int.MaxValue)]
         public void Exit()
         {
+            "Thank you for using our Library System!".WriteLineSuccess();
+            "Goodbye!".WriteLineInfo();
+            Thread.Sleep(1200);
 
+            Environment.Exit(0);
         }
     }
 }

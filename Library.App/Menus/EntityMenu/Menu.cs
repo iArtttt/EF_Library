@@ -105,6 +105,15 @@ namespace Library.App.Menus.EntityMenu
 
         private static Menu DetectMenu(Menu newMenu, Type typeMenu, params object[] values)
         {
+            var valuesList = values.ToList();
+            var existingMenuIndex = valuesList.FindIndex(v => v != null && v.GetType() == typeof(Menu));
+
+            if (existingMenuIndex != -1)
+                valuesList[existingMenuIndex] = newMenu; // Обновляем ссылку, если это вложенное меню
+            else
+                valuesList.Add(newMenu); // Добавляем, если его еще не было
+
+            var updatedValues = valuesList.ToArray(); // Создаем обновленный массив параметров
 
             var obj = Activator.CreateInstance(typeMenu);
 
@@ -113,7 +122,7 @@ namespace Library.App.Menus.EntityMenu
                 .Select(m =>
                 {
                     var attribute = m.GetCustomAttribute<MenuActionAttribute>();
-                    return new MenuItem(attribute!.Title, () => { m.Invoke(obj, MapValues(m, values)); }, attribute.Description);
+                    return new MenuItem(attribute!.Title, () => { m.Invoke(obj, MapValues(m, updatedValues)); }, attribute.Description);
                 });
 
             var subMenus = typeMenu.GetProperties()
@@ -126,7 +135,7 @@ namespace Library.App.Menus.EntityMenu
 
             foreach (var menu in subMenus)
             {
-                newMenu.AddMenuItem(DetectMenu(menu.Menu, menu.Type, values));
+                newMenu.AddMenuItem(DetectMenu(menu.Menu, menu.Type, updatedValues));
             }
             foreach (var item in menuItems)
             {
@@ -149,7 +158,8 @@ namespace Library.App.Menus.EntityMenu
                 if (index != -1)
                 {
                     result.Add(valuesList[index]);
-                    valuesList.RemoveAt(index);
+                    if (valuesList[index]?.GetType() != typeof(Menu))
+                        valuesList.RemoveAt(index);
                 }
                 else
                     result.Add(null);
@@ -162,46 +172,11 @@ namespace Library.App.Menus.EntityMenu
             DetectMenu<Lobby>().Process();
         }
 
-        /*
-                private static void LibrarianRegistration()
-                {
-                    Librarian librarian = new Librarian();
-                    string? loggin = string.Empty;
-
-                    loggin = ToWrite("Write New Loggin");
-                    if (string.IsNullOrEmpty(loggin))
-                    {
-                        Console.WriteLine("String is Empty");
-                        return;
-                    }
-                    if (librarians.Any(l => l.Login == loggin))
-                    {
-                        Console.WriteLine("Already Exist");
-                        return;
-                    }
-
-                    var password = ToWrite("Write New Password");
-                    if (string.IsNullOrEmpty(password))
-                    {
-                        Console.WriteLine("Password is Empty");
-                        return;
-                    }
-
-                    var email = ToWrite("Write your Email");
-
-                    librarian.Login = loggin;
-                    librarian.Password = password;
-                    librarian.Email = email;
-
-                    librarians.Add(librarian);
-                    using var context = new LibraryContext(DbConfig.Options);
-                    context.Librarians.Add(librarian);
-                    context.SaveChanges();
-                }
-                private static string? ToWrite(string msg)
-                {
-                    Console.WriteLine(msg);
-                    return Console.ReadLine();
-                }*/
+        // This Method was created to exit from SubMenus
+        internal void Stop()
+        {
+            _isExit = true;
+            _index = 0;
+        }
     }
 }
