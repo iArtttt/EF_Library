@@ -1,6 +1,161 @@
-﻿namespace Library.App.Menus.LibrarianMenu.SubMenu
+﻿using Library.App.ConsoleHelper;
+using Library.DAL;
+using Library.DAL.Models;
+using Library.Shared.Attributes;
+using Library.Shared.Enums;
+using System.Data;
+
+namespace Library.App.Menus.LibrarianMenu.SubMenu
 {
     internal class Books
     {
+        [MenuAction("Add Book", 0, "Add new book to Library")]
+        public void Add()
+        {
+            List<Author> existingAuthors;
+            List<PublisherCodeType> existingPublisherCodes;
+
+            string bookName = BookNameSet()??"Unnamed book";
+            Genre genre = GenreSet();
+            var publishDate = DateSet()??DateTime.Today;
+            var country = CountrySet();
+            var city = CitySet();
+            var count = CountSet();
+
+            using (var context = new LibraryContext(DbConfig.Options))
+            {
+                existingAuthors = context.Autors.ToList();
+                existingPublisherCodes = context.PublishingCodeTypes.ToList();
+                
+                var authors = AuthorsSet(existingAuthors);
+                foreach (var author in authors)
+                {
+                    context.Autors.Attach(author);
+                }
+
+                var publisherCodeType = PublishCodeSet(existingPublisherCodes);
+                
+                Book newBook = new Book()
+                {
+                    Name = bookName,
+                    PublisherType = publisherCodeType!,
+                    Authors = authors!,
+                    PublishYear = publishDate,
+                    Genre = genre,
+                    Country = country,
+                    City = city,
+                    Count = count,
+                };
+
+                context.Books.Add(newBook);
+                context.SaveChanges();
+            }
+            Console.Clear();
+            $"Success: Book '{bookName}' has been added to the library catalog!".WriteLineSuccess();
+            Console.ReadKey(true);
+        }
+
+        [MenuAction("Update", 0, "Updates existing book(s) in Library")]
+        public void Update()
+        {
+
+        }
+
+        [MenuAction("Remove", 0, "Removes existing book(s) from Library")]
+        public void Remove()
+        {
+
+        }
+
+
+        private string? BookNameSet()
+        {
+            string? bookName = "Write the new book Name: ".Read(ConsoleColor.Yellow);
+            if (string.IsNullOrEmpty(bookName))
+            {
+                "Incorrect Name".WriteLineError();
+                return null;
+            }
+            return bookName;
+        }
+
+        private string? CountrySet() => "Write Country where book from: ".Read(ConsoleColor.Yellow);
+        private string? CitySet() => "Write City where book from: ".Read(ConsoleColor.Yellow);
+        private int CountSet()
+        {
+
+            var stringCount = "How much books was arrived? ".Read(ConsoleColor.Yellow);
+            if (!int.TryParse(stringCount, out int count) || count < 1)
+            {
+                count = 1;
+            }
+
+
+            return count;
+        }
+        private Genre GenreSet()
+        {
+            Genre genre = Genre.None;
+            var existingGenres = new HelpMenu<Genre>("What genre has this book?", Enum.GetValues<Genre>(), true);
+            foreach (var item in existingGenres.Process())
+            {
+                genre |= item;
+            }
+            return genre;
+        }
+        private List<Author> AuthorsSet(List<Author> existingAuthors)
+        {
+            var selectAuthors = new HelpMenu<Author>("Who wrote this book?", existingAuthors, true);
+            var authors = selectAuthors.Process();
+
+            return authors == null || authors.Count == 0 
+                ? new List<Author> { existingAuthors.First() } 
+                : authors.Where(a => a != null).ToList()!;
+        }
+        private PublisherCodeType? PublishCodeSet(List<PublisherCodeType> existingPublisherCodes)
+        {
+            var selectPublisherCodes = new HelpMenu<PublisherCodeType>("What redaction was published by?", existingPublisherCodes);
+
+
+            var publisherCodeType = selectPublisherCodes.Process().FirstOrDefault();
+            if (publisherCodeType == null)
+            {
+                publisherCodeType = existingPublisherCodes.First();
+                "Incorrect Code type, was setted to default".WriteLineError();
+            }
+
+            return publisherCodeType;
+        }
+
+        private DateTime? DateSet()
+        {
+            int currentYear = DateTime.Now.Year;
+            var yearsRange = Enumerable.Range(1880, currentYear - 1880 + 1).Reverse().ToList();
+
+            var yearPicker = new HelpMenu<int>("Select Publish Year", yearsRange);
+            int? selectedYear = yearPicker.Process().FirstOrDefault();
+
+            if (selectedYear == null || selectedYear == 0) return null;
+
+
+            var monthsRange = Enumerable.Range(1, 12).ToList();
+
+            var monthPicker = new HelpMenu<int>($"Select Month (Year: {selectedYear})", monthsRange);
+            int? selectedMonth = monthPicker.Process().FirstOrDefault();
+
+            if (selectedMonth == null || selectedMonth == 0) return null;
+
+
+            int daysInMonth = DateTime.DaysInMonth(selectedYear.Value, selectedMonth.Value);
+            var daysRange = Enumerable.Range(1, daysInMonth).ToList();
+
+            var dayPicker = new HelpMenu<int>($"Select Day (Date: {selectedMonth}/{selectedYear})", daysRange);
+            int? selectedDay = dayPicker.Process().FirstOrDefault();
+
+            if (selectedDay == null || selectedDay == 0) return null;
+
+            DateTime finalPublishDate = new DateTime(selectedYear.Value, selectedMonth.Value, selectedDay.Value);
+            return finalPublishDate;
+        }
     }
 }
