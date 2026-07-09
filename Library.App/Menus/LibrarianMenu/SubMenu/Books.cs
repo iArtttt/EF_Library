@@ -12,9 +12,6 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         [MenuAction("Add Book", 0, "Add new book to Library")]
         public void Add()
         {
-            List<Author> existingAuthors;
-            List<PublisherCodeType> existingPublisherCodes;
-
             string bookName = BookNameSet()??"Unnamed book";
             Genre genre = GenreSet();
             var publishDate = DateSet()??DateTime.Today;
@@ -24,8 +21,8 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
 
             using (var context = new LibraryContext(DbConfig.Options))
             {
-                existingAuthors = context.Autors.ToList();
-                existingPublisherCodes = context.PublishingCodeTypes.ToList();
+                List<Author> existingAuthors = context.Autors.ToList();
+                List<PublisherCodeType> existingPublisherCodes = context.PublishingCodeTypes.ToList();
                 
                 var authors = AuthorsSet(existingAuthors);
                 foreach (var author in authors)
@@ -83,13 +80,11 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         private string? CitySet() => "Write City where book from: ".Read(ConsoleColor.Yellow);
         private int CountSet()
         {
-
             var stringCount = "How much books was arrived? ".Read(ConsoleColor.Yellow);
             if (!int.TryParse(stringCount, out int count) || count < 1)
             {
                 count = 1;
             }
-
 
             return count;
         }
@@ -101,6 +96,7 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
             {
                 genre |= item;
             }
+            
             return genre;
         }
         private List<Author> AuthorsSet(List<Author> existingAuthors)
@@ -115,7 +111,6 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         private PublisherCodeType? PublishCodeSet(List<PublisherCodeType> existingPublisherCodes)
         {
             var selectPublisherCodes = new HelpMenu<PublisherCodeType>("What redaction was published by?", existingPublisherCodes);
-
 
             var publisherCodeType = selectPublisherCodes.Process().FirstOrDefault();
             if (publisherCodeType == null)
@@ -139,7 +134,6 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
 
 
             var monthsRange = Enumerable.Range(1, 12).ToList();
-
             var monthPicker = new HelpMenu<int>($"Select Month (Year: {selectedYear})", monthsRange);
             int? selectedMonth = monthPicker.Process().FirstOrDefault();
 

@@ -13,7 +13,7 @@ namespace Library.App.ConsoleHelper
         private bool _multiSelect;
         private bool _isExit = false;
         private readonly List<MenuWrapper> _elements = new();
-        private readonly Func<T, T?> _action;
+        private Func<T, T?> _action;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpMenu{T}"/> class with a custom action but without a title.
@@ -93,8 +93,20 @@ namespace Library.App.ConsoleHelper
                 _elements.Add(new MenuWrapper { Name = displayName, Value = item });
             }
         }
-        public List<T?> Process()
+        public List<T?> Process(Func<T, T?>? action = null)
         {
+            if (action != null)
+                _action = action;
+
+            if (_elements.Count == 0)
+            {
+                $"\n=== {Title??"Make a choise"} ===\n".WriteLineInfo();
+                "_".PadRight(Console.BufferWidth, '_').WriteLineUnknownDark();
+                "No elements available in this list.".WriteLineError();
+                "\nPress any key to return...".WriteInfoDark();
+                Console.ReadKey(true);
+                return Results;
+            }
 
             while (!_isExit)
             {
@@ -103,13 +115,6 @@ namespace Library.App.ConsoleHelper
                 $"\n=== {Title??"Make a choise"} ===\n".WriteLineInfo();
                 "_".PadRight(Console.BufferWidth, '_').WriteLineUnknownDark();
                 
-                if (_elements.Count == 0)
-                {
-                    "No elements available in this list.".WriteLineError();
-                    "\nPress any key to return...".WriteInfoDark();
-                    Console.ReadKey(true);
-                    return Results;
-                }
 
                 for (int i = 0; i < _elements.Count; i++)
                 {

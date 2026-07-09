@@ -15,14 +15,8 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
             string? toSearch = "Please write Book Name you want to find (Enter to show All): ".Read(ConsoleColor.Yellow);
             List<Book> books;
 
-            using (var context = new LibraryContext(DbConfig.Options))
-            {
-                if (string.IsNullOrEmpty(toSearch))
-                    books = context.Books.Include(b => b.Authors).ToList();
-                else
-                    books = context.Books.Where(b => b.Name.Contains(toSearch)).Include(b => b.Authors).ToList();
-            }
-            foreach (var book in books)
+            books = FindBooks(toSearch);
+            foreach (var book in books.OrderBy(b =>b.Name))
             {
                 $"Name: {book.Name}\t|\tAuthor(s): {string.Join(", ", book.Authors.Select(a => a.Name))}\t|\tCount: {book.Count}".WriteLineInfo();
             }
@@ -36,26 +30,32 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
             Console.Clear();
             string toSearch = "Please write Author Name you want to find: ".Read(ConsoleColor.Yellow);
 
-            List<Author> authors;
+            var books = FindBooks(toSearch);
+            var authors = books.SelectMany(b => b.Authors.Select(a => a)).Distinct().ToDictionary(a => a, a => a.Books);
 
-            using (var context = new LibraryContext(DbConfig.Options))
-            {
-                if (string.IsNullOrEmpty(toSearch))
-                    authors = context.Autors.Include(a => a.Books).ToList();
-                else
-                    authors = context.Autors.Where(a => a.Name.Contains(toSearch) || a.LastName.Contains(toSearch)).Include(b => b.Books).ToList();
-            }
             foreach (var author in authors)
             {
-                string booksList = string.Join(";\n\t", author.Books.Select(a => a.Name));
-                $"Name: {author.Name} {author.LastName}\nBook(s):".WriteLineInfo();
+                string booksList = string.Join(";\n\t", author.Value.Select(b => b.Name));
+                $"Name: {author.Key.Name} {author.Key.LastName} {author.Key.SecondName??$"Pseudonym: {author.Key.SecondName}"}\nBook(s):".WriteLineInfo();
                 $"\t{booksList};".WriteLineSuccessDark();
-                $"Total Books was Writen: {author.Books.Count}\n".WriteLineInfo();
+                $"Total Books was Writen: {author.Value.Count}\n".WriteLineInfo();
             }
 
             "\nPress any key to return...".WriteInfoDark();
             Console.ReadKey(true);
         }
-        
+        public static List<Book> FindBooks(string? toSearch = null)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+            var query = context.Books.Include(b => b.Authors).AsNoTracking();
+            
+            if (string.IsNullOrEmpty(toSearch))
+                return query.ToList();
+            else
+                return query.Where(b => 
+                    b.Name.Contains(toSearch) || 
+                    b.Authors.Any(a => a.Name.Contains(toSearch) || a.LastName.Contains(toSearch))).ToList();
+
+        }
     }
 }
