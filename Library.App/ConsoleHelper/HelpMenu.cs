@@ -21,11 +21,10 @@ namespace Library.App.ConsoleHelper
         /// <param name="action">The delegate executed when an item is selected.</param>
         /// <param name="values">The collection of items to display in the menu.</param>
         /// <param name="multiSelect">Specifies whether multiple items can be selected at once.</param>
-        public HelpMenu(Func<T, T?> action, IEnumerable<T> values, bool multiSelect = false)
+        public HelpMenu(Func<T, T?> action, IEnumerable<T> values)
         {
             Title = null;
             _action = action;
-            _multiSelect = multiSelect;
             AddElements(values);
         }
         /// <summary>
@@ -33,11 +32,10 @@ namespace Library.App.ConsoleHelper
         /// </summary>
         /// <param name="values">The collection of items to display in the menu.</param>
         /// <param name="multiSelect">Specifies whether multiple items can be selected at once.</param>
-        public HelpMenu(IEnumerable<T> values, bool multiSelect = false)
+        public HelpMenu(IEnumerable<T> values)
         {
             Title = null;
             _action = a => a;
-            _multiSelect = multiSelect;
             AddElements(values);
         }
         /// <summary>
@@ -46,11 +44,10 @@ namespace Library.App.ConsoleHelper
         /// <param name="title">The header text displayed at the top of the menu.</param>
         /// <param name="values">The collection of items to display in the menu.</param>
         /// <param name="multiSelect">Specifies whether multiple items can be selected at once.</param>
-        public HelpMenu(string title, IEnumerable<T> values, bool multiSelect = false)
+        public HelpMenu(string title, IEnumerable<T> values)
         {
             Title = title;
             _action = a => a;
-            _multiSelect = multiSelect;
             AddElements(values);
         }
         /// <summary>
@@ -60,11 +57,10 @@ namespace Library.App.ConsoleHelper
         /// <param name="action">The delegate executed when an item is selected.</param>
         /// <param name="values">The collection of items to display in the menu.</param>
         /// <param name="multiSelect">Specifies whether multiple items can be selected at once.</param>
-        public HelpMenu(string title, Func<T, T?> action, IEnumerable<T> values, bool multiSelect = false)
+        public HelpMenu(string title, Func<T, T?> action, IEnumerable<T> values)
         {
             Title = title;
             _action = action;
-            _multiSelect = multiSelect;
             AddElements(values);
         }
         private class MenuWrapper
@@ -93,7 +89,19 @@ namespace Library.App.ConsoleHelper
                 _elements.Add(new MenuWrapper { Name = displayName, Value = item });
             }
         }
-        public List<T?> Process(Func<T, T?>? action = null)
+        public T? Select(Func<T, T?>? action = null)
+        {
+            _multiSelect = false;
+            return Process(action).FirstOrDefault();
+        }
+
+        public List<T?> MultiSelect(Func<T, T?>? action = null)
+        {
+            _multiSelect = true;
+            return Process(action);
+        }
+
+        private List<T?> Process(Func<T, T?>? action)
         {
             if (action != null)
                 _action = action;

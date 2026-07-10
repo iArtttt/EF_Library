@@ -1,0 +1,96 @@
+﻿using Library.DAL.Models;
+using Library.Shared.Enums;
+
+namespace Library.App.ConsoleHelper
+{
+    internal static class BookHelper
+    {
+
+        public static string? BookNameSet()
+        {
+            string? bookName = "Write the new book Name: ".Read(ConsoleColor.Yellow);
+            if (string.IsNullOrEmpty(bookName))
+            {
+                "Incorrect Name".WriteLineError();
+                return null;
+            }
+            return bookName;
+        }
+
+        public static string? CountrySet() => "Write Country where book from: ".Read(ConsoleColor.Yellow);
+        public static string? CitySet() => "Write City where book from: ".Read(ConsoleColor.Yellow);
+        public static int CountSet()
+        {
+            var stringCount = "How much books was arrived? ".Read(ConsoleColor.Yellow);
+            if (!int.TryParse(stringCount, out int count) || count < 1)
+            {
+                count = 1;
+            }
+
+            return count;
+        }
+        public static Genre GenreSet()
+        {
+            Genre genre = Genre.None;
+            var existingGenres = new HelpMenu<Genre>("What genre has this book?", Enum.GetValues<Genre>());
+            foreach (var item in existingGenres.MultiSelect())
+            {
+                genre |= item;
+            }
+
+            return genre;
+        }
+        public static List<Author> AuthorsSet(List<Author> existingAuthors)
+        {
+            var selectAuthors = new HelpMenu<Author>("Who wrote this book?", existingAuthors);
+            var authors = selectAuthors.MultiSelect();
+
+            return authors == null || authors.Count == 0
+                ? new List<Author> { existingAuthors.First() }
+                : authors.Where(a => a != null).ToList()!;
+        }
+        public static PublisherCodeType? PublishCodeSet(List<PublisherCodeType> existingPublisherCodes)
+        {
+            var selectPublisherCodes = new HelpMenu<PublisherCodeType>("What redaction was published by?", existingPublisherCodes);
+
+            var publisherCodeType = selectPublisherCodes.Select();
+            if (publisherCodeType == null)
+            {
+                publisherCodeType = existingPublisherCodes.First();
+                "Incorrect Code type, was setted to default".WriteLineError();
+            }
+
+            return publisherCodeType;
+        }
+
+        public static DateTime? DateSet()
+        {
+            int currentYear = DateTime.Now.Year;
+            var yearsRange = Enumerable.Range(1880, currentYear - 1880 + 1).Reverse().ToList();
+
+            var yearPicker = new HelpMenu<int>("Select Publish Year", yearsRange);
+            int? selectedYear = yearPicker.Select();
+
+            if (selectedYear == null || selectedYear == 0) return null;
+
+
+            var monthsRange = Enumerable.Range(1, 12).ToList();
+            var monthPicker = new HelpMenu<int>($"Select Month (Year: {selectedYear})", monthsRange);
+            int? selectedMonth = monthPicker.Select();
+
+            if (selectedMonth == null || selectedMonth == 0) return null;
+
+
+            int daysInMonth = DateTime.DaysInMonth(selectedYear.Value, selectedMonth.Value);
+            var daysRange = Enumerable.Range(1, daysInMonth).ToList();
+
+            var dayPicker = new HelpMenu<int>($"Select Day (Date: {selectedMonth}/{selectedYear})", daysRange);
+            int? selectedDay = dayPicker.Select();
+
+            if (selectedDay == null || selectedDay == 0) return null;
+
+            DateTime finalPublishDate = new DateTime(selectedYear.Value, selectedMonth.Value, selectedDay.Value);
+            return finalPublishDate;
+        }
+    }
+}
