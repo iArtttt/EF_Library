@@ -51,16 +51,18 @@ namespace Library.App.ConsoleHelper
         }
         public static PublisherCodeType? PublishCodeSet(List<PublisherCodeType> existingPublisherCodes)
         {
-            var selectPublisherCodes = new HelpMenu<PublisherCodeType>("What redaction was published by?", existingPublisherCodes);
+            var codesDictionary = existingPublisherCodes.ToDictionary(c => c.PublisherCode, c => c);
+            var selectPublisherCodes = new HelpMenu<string>("What redaction was published by?", codesDictionary.Keys);
 
-            var publisherCodeType = selectPublisherCodes.Select();
-            if (publisherCodeType == null)
+            var selectedPublisherCodeType = selectPublisherCodes.Select();
+            if (string.IsNullOrEmpty(selectedPublisherCodeType))
             {
-                publisherCodeType = existingPublisherCodes.First();
                 "Incorrect Code type, was setted to default".WriteLineError();
+                Console.ReadKey(true);
+                return existingPublisherCodes.First();
             }
 
-            return publisherCodeType;
+            return codesDictionary[selectedPublisherCodeType];
         }
 
         public static DateTime? DateSet()
