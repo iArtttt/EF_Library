@@ -56,13 +56,9 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         [MenuAction("Update", 0, "Updates existing book(s) in Library")]
         public void Update()
         {
-            Console.Clear();
-            string? toSearch = "Please write Book Name or Author Name you want to find (Enter to show All): ".Read(ConsoleColor.Yellow);
-            List<Book> books = Search.FindBooks(toSearch);
 
-            var bookSelector = new HelpMenu<Book>("Select Book you want to change", books);
-            var selectedBook = bookSelector.Select();
-            
+            var selectedBook = BookHelper.GetBookFromMenu();
+
             if (selectedBook == null)
             {
                 "No books were found".WriteErrorDark();
@@ -138,12 +134,8 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         [MenuAction("Remove", 0, "Removes existing book(s) from Library")]
         public void Remove()
         {
-            Console.Clear();
-            string? toSearch = "Please write Book Name or Author Name you want to find (Enter to show All): ".Read(ConsoleColor.Yellow);
-            List<Book> books = Search.FindBooks(toSearch);
+            var selectedBook = BookHelper.GetBookFromMenu(null, "Select Book you want to REMOVE");
 
-            var bookSelector = new HelpMenu<Book>("Select Book you want to REMOVE", books);
-            var selectedBook = bookSelector.Select();
             if (selectedBook == null) return;
 
             var genres = selectedBook.Genre.ToString();

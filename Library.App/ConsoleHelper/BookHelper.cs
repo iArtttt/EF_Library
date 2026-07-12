@@ -2,6 +2,7 @@
 using Library.DAL;
 using Library.DAL.Models;
 using Library.Shared.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.App.ConsoleHelper
 {
@@ -96,12 +97,10 @@ namespace Library.App.ConsoleHelper
             DateTime finalPublishDate = new DateTime(selectedYear.Value, selectedMonth.Value, selectedDay.Value);
             return finalPublishDate;
         }
-        public static void BorrowBook(Book? bookToBorrow = null)
+
+        public static void BorrowBook()
         {
-            Console.Clear();
-
-            Book? selectedBook = bookToBorrow ?? GetBookFromMenu(); 
-
+            Book? selectedBook = GetBookFromMenu();
             if (selectedBook == null) return;
 
             List<Reader> activeReaders;
@@ -111,27 +110,68 @@ namespace Library.App.ConsoleHelper
             }
 
             Reader? selectedReader = ReaderHelper.ReaderSelect(activeReaders);
-            if (selectedReader == null) return; 
+            if (selectedReader == null) return;
+
+            ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
+        }
+
+        public static void BorrowBook(Reader currentReader)
+        {
+            Book? selectedBook = GetBookFromMenu();
+            if (selectedBook == null) return;
+
+            ExecuteBorrowTransaction(currentReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
+        }
+        public static void BorrowBook(Book selectedBook)
+        {
+            if (selectedBook.Count <= 0)
+            {
+                $"Error: '{selectedBook.Name}' is out of stock.".WriteLineError();
+                Console.ReadKey(true);
+                return;
+            }
+
+            List<Reader> activeReaders;
+            using (var context = new LibraryContext(DbConfig.Options))
+            {
+                activeReaders = context.Readers.ToList();
+            }
+
+            Reader? selectedReader = ReaderHelper.ReaderSelect(activeReaders);
+            if (selectedReader == null) return;
+
+            ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
+        }
+
+        private static void ExecuteBorrowTransaction(int readerId, int bookId, string bookName, int returnedDays)
+        {
+            Console.Clear();
 
             using (var context = new LibraryContext(DbConfig.Options))
             {
-                var dbBook = context.Books.Find(selectedBook.Id);
-                var dbReader = context.Readers.Find(selectedReader.Id);
+                var dbBook = context.Books.Find(bookId);
+                var dbReader = context.Readers.Find(readerId);
 
                 if (dbBook != null && dbReader != null)
                 {
+                    if (dbBook.Count <= 0)
+                    {
+                        $"Error: '{bookName}' is currently out of stock!".WriteLineError();
+                        Console.ReadKey(true);
+                        return;
+                    }
+
                     var loan = new BorrowedBook
                     {
                         BookId = dbBook.Id,
                         ReaderId = dbReader.Id,
                         Taken = DateTime.Now,
-                        ToReturn = DateTime.Now.AddDays(dbBook.ReturnedDays),
+                        ToReturn = DateTime.Now.AddDays(returnedDays),
                         IsReturned = false
                     };
 
                     context.BorrowedBooks.Add(loan);
-
-                    dbBook.Count--;
+                    dbBook.Count--; 
 
                     context.SaveChanges();
 
@@ -147,14 +187,28 @@ namespace Library.App.ConsoleHelper
 
             Console.ReadKey(true);
         }
-        private static Book? GetBookFromMenu()
+
+        public static Book? GetBookFromMenu(string? toSearchText = null, string? toSelectText = null)
         {
-            string? toSearch = "Write Book Name or Author to issue: ".Read(ConsoleColor.Yellow);
-            List<Book> foundBooks = Search.FindBooks(toSearch);
+            string? toSearch = (toSearchText ?? "Write Book Name or Author to issue: ").Read(ConsoleColor.Yellow);
+            List<Book> foundBooks = FindBooks(toSearch);
             var availableBooks = foundBooks.Where(b => b.Count > 0).ToList();
 
-            var bookSelector = new HelpMenu<Book>("Select Book to Issue", availableBooks);
+            var bookSelector = new HelpMenu<Book>(toSelectText ?? "Select Book to Issue", availableBooks);
             return bookSelector.Select();
+        }
+        public static List<Book> FindBooks(string? toSearch = null)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+            var query = context.Books.Include(b => b.Authors).AsNoTracking();
+
+            if (string.IsNullOrEmpty(toSearch))
+                return query.ToList();
+            else
+                return query.Where(b =>
+                    b.Name.Contains(toSearch) ||
+                    b.Authors.Any(a => a.Name.Contains(toSearch) || a.LastName.Contains(toSearch))).ToList();
+
         }
     }
 }
