@@ -1,4 +1,6 @@
-﻿using Library.DAL.Models;
+﻿using Library.App.Menus.LibrarianMenu.SubMenu;
+using Library.DAL;
+using Library.DAL.Models;
 using Library.Shared.Enums;
 
 namespace Library.App.ConsoleHelper
@@ -93,6 +95,66 @@ namespace Library.App.ConsoleHelper
 
             DateTime finalPublishDate = new DateTime(selectedYear.Value, selectedMonth.Value, selectedDay.Value);
             return finalPublishDate;
+        }
+        public static void BorrowBook(Book? bookToBorrow = null)
+        {
+            Console.Clear();
+
+            Book? selectedBook = bookToBorrow ?? GetBookFromMenu(); 
+
+            if (selectedBook == null) return;
+
+            List<Reader> activeReaders;
+            using (var context = new LibraryContext(DbConfig.Options))
+            {
+                activeReaders = context.Readers.ToList();
+            }
+
+            Reader? selectedReader = ReaderHelper.ReaderSelect(activeReaders);
+            if (selectedReader == null) return; 
+
+            using (var context = new LibraryContext(DbConfig.Options))
+            {
+                var dbBook = context.Books.Find(selectedBook.Id);
+                var dbReader = context.Readers.Find(selectedReader.Id);
+
+                if (dbBook != null && dbReader != null)
+                {
+                    var loan = new BorrowedBook
+                    {
+                        BookId = dbBook.Id,
+                        ReaderId = dbReader.Id,
+                        Taken = DateTime.Now,
+                        ToReturn = DateTime.Now.AddDays(dbBook.ReturnedDays),
+                        IsReturned = false
+                    };
+
+                    context.BorrowedBooks.Add(loan);
+
+                    dbBook.Count--;
+
+                    context.SaveChanges();
+
+                    Console.Clear();
+                    $"Success: '{dbBook.Name}' has been successfully issued to {dbReader.Name} {dbReader.LastName}!".WriteLineSuccess();
+                    $"Deadline to return: {loan.ToReturn.ToShortDateString()}".WriteLineInfo();
+                }
+                else
+                {
+                    "Error: Database sync issue. Transaction aborted.".WriteLineError();
+                }
+            }
+
+            Console.ReadKey(true);
+        }
+        private static Book? GetBookFromMenu()
+        {
+            string? toSearch = "Write Book Name or Author to issue: ".Read(ConsoleColor.Yellow);
+            List<Book> foundBooks = Search.FindBooks(toSearch);
+            var availableBooks = foundBooks.Where(b => b.Count > 0).ToList();
+
+            var bookSelector = new HelpMenu<Book>("Select Book to Issue", availableBooks);
+            return bookSelector.Select();
         }
     }
 }

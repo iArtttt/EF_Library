@@ -13,7 +13,7 @@ namespace Library.App.ConsoleHelper
         private bool _multiSelect;
         private bool _isExit = false;
         private readonly List<MenuWrapper> _elements = new();
-        private Func<T, T?> _action;
+        private Func<T, T?> _selector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpMenu{T}"/> class with a custom action but without a title.
@@ -24,7 +24,7 @@ namespace Library.App.ConsoleHelper
         public HelpMenu(Func<T, T?> action, IEnumerable<T> values)
         {
             Title = null;
-            _action = action;
+            _selector = action;
             AddElements(values);
         }
         /// <summary>
@@ -35,7 +35,7 @@ namespace Library.App.ConsoleHelper
         public HelpMenu(IEnumerable<T> values)
         {
             Title = null;
-            _action = a => a;
+            _selector = a => a;
             AddElements(values);
         }
         /// <summary>
@@ -47,7 +47,7 @@ namespace Library.App.ConsoleHelper
         public HelpMenu(string title, IEnumerable<T> values)
         {
             Title = title;
-            _action = a => a;
+            _selector = a => a;
             AddElements(values);
         }
         /// <summary>
@@ -60,7 +60,7 @@ namespace Library.App.ConsoleHelper
         public HelpMenu(string title, Func<T, T?> action, IEnumerable<T> values)
         {
             Title = title;
-            _action = action;
+            _selector = action;
             AddElements(values);
         }
         private class MenuWrapper
@@ -89,22 +89,22 @@ namespace Library.App.ConsoleHelper
                 _elements.Add(new MenuWrapper { Name = displayName, Value = item });
             }
         }
-        public T? Select(Func<T, T?>? action = null)
+        public T? Select(Func<T, T?>? selector = null)
         {
             _multiSelect = false;
-            return Process(action).FirstOrDefault();
+            return Process(selector).FirstOrDefault();
         }
 
-        public List<T?> MultiSelect(Func<T, T?>? action = null)
+        public List<T?> MultiSelect(Func<T, T?>? selector = null)
         {
             _multiSelect = true;
-            return Process(action);
+            return Process(selector);
         }
 
-        private List<T?> Process(Func<T, T?>? action)
+        private List<T?> Process(Func<T, T?>? selector)
         {
-            if (action != null)
-                _action = action;
+            if (selector != null)
+                _selector = selector;
 
             if (_elements.Count == 0)
             {
@@ -181,7 +181,7 @@ namespace Library.App.ConsoleHelper
                             if (_elements.Count > 0)
                             {
                                 var currentElement = _elements[_index];
-                                var mappedValue = _action.Invoke(currentElement.Value);
+                                var mappedValue = _selector.Invoke(currentElement.Value);
 
                                 if (!_multiSelect)
                                 {
@@ -191,7 +191,7 @@ namespace Library.App.ConsoleHelper
                                 else
                                 {
                                     if (!_elements[_index].IsChoosen)
-                                        Results.Add(_action.Invoke(_elements[_index].Value));
+                                        Results.Add(_selector.Invoke(_elements[_index].Value));
                                     else
                                         Results.RemoveAll(r => r != null && r.Equals(mappedValue));
 

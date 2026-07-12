@@ -13,36 +13,64 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         {
             Console.Clear();
             string? toSearch = "Please write Book Name you want to find (Enter to show All): ".Read(ConsoleColor.Yellow);
-            List<Book> books;
+            List<Book> books = FindBooks(toSearch);
 
-            books = FindBooks(toSearch);
-            foreach (var book in books.OrderBy(b =>b.Name))
+            if (books.Count == 0)
             {
-                $"Name: {book.Name}\t|\tAuthor(s): {string.Join(", ", book.Authors.Select(a => a.Name))}\t|\tCount: {book.Count}".WriteLineInfo();
+                "No books found matching your criteria.".WriteLineError();
+                "\nPress any key to return...".WriteInfoDark();
+                Console.ReadKey(true);
+                return;
+            }
+            var searchResultsMenu = new HelpMenu<Book>(
+                $"Search Results for '{toSearch}' (Select a book to Borrow)",
+                books.OrderBy(b => b.Name)
+                );
+
+            Book? selectedBook = searchResultsMenu.Select();
+
+            if (selectedBook != null)
+            {
+                BookHelper.BorrowBook(selectedBook);
             }
 
-            "\nPress any key to return...".WriteInfoDark();
-            Console.ReadKey(true);
         }
         [MenuAction("Author", 0, "Search books by Author Name")]
         public void ByAuthor()
         {
             Console.Clear();
-            string toSearch = "Please write Author Name you want to find: ".Read(ConsoleColor.Yellow);
+            string? toSearch = "Please write Author Name or Lastname you want to find: ".Read(ConsoleColor.Yellow);
 
-            var books = FindBooks(toSearch);
-            var authors = books.SelectMany(b => b.Authors.Select(a => a)).Distinct().ToDictionary(a => a, a => a.Books);
-
-            foreach (var author in authors)
+            if (string.IsNullOrEmpty(toSearch))
             {
-                string booksList = string.Join(";\n\t", author.Value.Select(b => b.Name));
-                $"Name: {author.Key.Name} {author.Key.LastName} {author.Key.SecondName??$"Pseudonym: {author.Key.SecondName}"}\nBook(s):".WriteLineInfo();
-                $"\t{booksList};".WriteLineSuccessDark();
-                $"Total Books was Writen: {author.Value.Count}\n".WriteLineInfo();
+                "Author name cannot be empty!".WriteLineError();
+                "\nPress any key to return...".WriteInfoDark();
+                Console.ReadKey(true);
+                return;
             }
 
-            "\nPress any key to return...".WriteInfoDark();
-            Console.ReadKey(true);
+            List<Book> books = FindBooks(toSearch);
+
+            if (books.Count == 0)
+            {
+                $"No books found for author matching '{toSearch}'.".WriteLineError();
+                "\nPress any key to return...".WriteInfoDark();
+                Console.ReadKey(true);
+                return;
+            }
+
+            var searchResultsMenu = new HelpMenu<Book>(
+                $"Books found for Author '{toSearch}' (Select to Borrow)",
+                book => book,
+                books.OrderBy(b => b.Name)
+            );
+
+            Book? selectedBook = searchResultsMenu.Select();
+
+            if (selectedBook != null)
+            {
+                BookHelper.BorrowBook(selectedBook);
+            }
         }
         public static List<Book> FindBooks(string? toSearch = null)
         {
