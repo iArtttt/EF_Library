@@ -1,4 +1,5 @@
-﻿using Library.Shared.Attributes;
+﻿using Library.DAL.Models;
+using Library.Shared.Attributes;
 
 namespace Library.App.Menus.LibrarianMenu.SubMenu
 {
@@ -7,9 +8,10 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         [MenuAction("New Reader", 0, "Add new reader to the Library")]
         public void Add()
         {
-
+            Reader newReader = new Reader();
+            newReader.
         }
-        [MenuAction("Change existing Reader", 1, "")]
+        [MenuAction("Change existing Reader", 1, "Change information about Existing reader")]
         public void Update()
         {
 

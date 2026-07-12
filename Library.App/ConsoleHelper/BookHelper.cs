@@ -1,5 +1,4 @@
-﻿using Library.App.Menus.LibrarianMenu.SubMenu;
-using Library.DAL;
+﻿using Library.DAL;
 using Library.DAL.Models;
 using Library.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -9,29 +8,12 @@ namespace Library.App.ConsoleHelper
     internal static class BookHelper
     {
 
-        public static string? BookNameSet()
-        {
-            string? bookName = "Write the new book Name: ".Read(ConsoleColor.Yellow);
-            if (string.IsNullOrEmpty(bookName))
-            {
-                "Incorrect Name".WriteLineError();
-                return null;
-            }
-            return bookName;
-        }
+        public static string? BookNameSet() => BaseHelper.GetString("Write the new book Name: ");
+        public static string? CountrySet() => BaseHelper.GetString("Write Country where book from: ");
+        public static string? CitySet() => BaseHelper.GetString("Write City where book from: ");
+        public static int CountSet() => BaseHelper.GetInt("How much books was arrived? ");
+        public static DateTime? DateSet() => BaseHelper.DateSet();
 
-        public static string? CountrySet() => "Write Country where book from: ".Read(ConsoleColor.Yellow);
-        public static string? CitySet() => "Write City where book from: ".Read(ConsoleColor.Yellow);
-        public static int CountSet()
-        {
-            var stringCount = "How much books was arrived? ".Read(ConsoleColor.Yellow);
-            if (!int.TryParse(stringCount, out int count) || count < 1)
-            {
-                count = 1;
-            }
-
-            return count;
-        }
         public static Genre GenreSet()
         {
             Genre genre = Genre.None;
@@ -68,48 +50,13 @@ namespace Library.App.ConsoleHelper
             return codesDictionary[selectedPublisherCodeType];
         }
 
-        public static DateTime? DateSet()
-        {
-            int currentYear = DateTime.Now.Year;
-            var yearsRange = Enumerable.Range(1880, currentYear - 1880 + 1).Reverse().ToList();
-
-            var yearPicker = new HelpMenu<int>("Select Publish Year", yearsRange);
-            int? selectedYear = yearPicker.Select();
-
-            if (selectedYear == null || selectedYear == 0) return null;
-
-
-            var monthsRange = Enumerable.Range(1, 12).ToList();
-            var monthPicker = new HelpMenu<int>($"Select Month (Year: {selectedYear})", monthsRange);
-            int? selectedMonth = monthPicker.Select();
-
-            if (selectedMonth == null || selectedMonth == 0) return null;
-
-
-            int daysInMonth = DateTime.DaysInMonth(selectedYear.Value, selectedMonth.Value);
-            var daysRange = Enumerable.Range(1, daysInMonth).ToList();
-
-            var dayPicker = new HelpMenu<int>($"Select Day (Date: {selectedMonth}/{selectedYear})", daysRange);
-            int? selectedDay = dayPicker.Select();
-
-            if (selectedDay == null || selectedDay == 0) return null;
-
-            DateTime finalPublishDate = new DateTime(selectedYear.Value, selectedMonth.Value, selectedDay.Value);
-            return finalPublishDate;
-        }
 
         public static void BorrowBook()
         {
             Book? selectedBook = GetBookFromMenu();
             if (selectedBook == null) return;
 
-            List<Reader> activeReaders;
-            using (var context = new LibraryContext(DbConfig.Options))
-            {
-                activeReaders = context.Readers.ToList();
-            }
-
-            Reader? selectedReader = ReaderHelper.ReaderSelect(activeReaders);
+            Reader? selectedReader = ReaderHelper.GetReader();
             if (selectedReader == null) return;
 
             ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
@@ -131,13 +78,7 @@ namespace Library.App.ConsoleHelper
                 return;
             }
 
-            List<Reader> activeReaders;
-            using (var context = new LibraryContext(DbConfig.Options))
-            {
-                activeReaders = context.Readers.ToList();
-            }
-
-            Reader? selectedReader = ReaderHelper.ReaderSelect(activeReaders);
+            Reader? selectedReader = ReaderHelper.GetReader();
             if (selectedReader == null) return;
 
             ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
