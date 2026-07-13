@@ -14,8 +14,7 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
                 "Found Books (Select one to Borrow)"
                 );
 
-            if (selectedBook != null)
-                BookHelper.BorrowBook(selectedBook);
+            selectedBook?.BorrowBook();
 
         }
         [MenuAction("Author", 0, "Search books by Author Name, Last Name or Second Name")]
@@ -26,8 +25,7 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
                 "Books of this Author (Select one to Borrow)"
                 );
 
-            if (selectedBook != null)
-                BookHelper.BorrowBook(selectedBook);
+            selectedBook?.BorrowBook();
         }
         
     }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Library.App.ConsoleHelper
 {
-    internal static class BookHelper
+    public static class BookHelper
     {
 
         public static string? BookNameSet() => BaseHelper.GetString("Write the new book Name: ");
@@ -50,84 +50,6 @@ namespace Library.App.ConsoleHelper
             return codesDictionary[selectedPublisherCodeType];
         }
 
-
-        public static void BorrowBook()
-        {
-            Book? selectedBook = FindBook();
-            if (selectedBook == null) return;
-
-            Reader? selectedReader = ReaderHelper.FindReader();
-            if (selectedReader == null) return;
-
-            ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
-        }
-
-        public static void BorrowBook(Reader currentReader)
-        {
-            Book? selectedBook = FindBook();
-            if (selectedBook == null) return;
-
-            ExecuteBorrowTransaction(currentReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
-        }
-        public static void BorrowBook(Book selectedBook)
-        {
-            if (selectedBook.Count <= 0)
-            {
-                $"Error: '{selectedBook.Name}' is out of stock.".WriteLineError();
-                Console.ReadKey(true);
-                return;
-            }
-
-            Reader? selectedReader = ReaderHelper.FindReader();
-            if (selectedReader == null) return;
-
-            ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
-        }
-
-        private static void ExecuteBorrowTransaction(int readerId, int bookId, string bookName, int returnedDays)
-        {
-            Console.Clear();
-
-            using (var context = new LibraryContext(DbConfig.Options))
-            {
-                var dbBook = context.Books.Find(bookId);
-                var dbReader = context.Readers.Find(readerId);
-
-                if (dbBook != null && dbReader != null)
-                {
-                    if (dbBook.Count <= 0)
-                    {
-                        $"Error: '{bookName}' is currently out of stock!".WriteLineError();
-                        Console.ReadKey(true);
-                        return;
-                    }
-
-                    var loan = new BorrowedBook
-                    {
-                        BookId = dbBook.Id,
-                        ReaderId = dbReader.Id,
-                        Taken = DateTime.Now,
-                        ToReturn = DateTime.Now.AddDays(returnedDays),
-                        IsReturned = false
-                    };
-
-                    context.BorrowedBooks.Add(loan);
-                    dbBook.Count--; 
-
-                    context.SaveChanges();
-
-                    Console.Clear();
-                    $"Success: '{dbBook.Name}' has been successfully issued to {dbReader.Name} {dbReader.LastName}!".WriteLineSuccess();
-                    $"Deadline to return: {loan.ToReturn.ToShortDateString()}".WriteLineInfo();
-                }
-                else
-                {
-                    "Error: Database sync issue. Transaction aborted.".WriteLineError();
-                }
-            }
-
-            Console.ReadKey(true);
-        }
 
         public static Book? FindBook(string? toSearchText = null, string? toSelectText = null)
         {
