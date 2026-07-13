@@ -3,7 +3,6 @@ using Library.DAL;
 using Library.DAL.Models;
 using Library.Shared.Attributes;
 using Library.Shared.Enums;
-using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Library.App.Menus.LibrarianMenu.SubMenu
@@ -57,21 +56,15 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         public void Update()
         {
 
-            var selectedBook = BookHelper.GetBookFromMenu();
+            var selectedBook = BookHelper.FindBook();
 
             if (selectedBook == null)
             {
                 "No books were found".WriteErrorDark();
                 return;
             }
-            using (var context = new LibraryContext(DbConfig.Options))
+            bool isUpdated = BookHelper.Update(selectedBook.Id, (dbBook, context) =>
             {
-                var dbBook = context.Books.Include(b => b.Authors)
-                                          .Include(b => b.PublisherType)
-                                          .FirstOrDefault(b => b.Id == selectedBook.Id);
-
-                if (dbBook == null) return;
-
                 var existingAuthors = context.Autors.ToList();
                 var existingPublisherCodes = context.PublishingCodeTypes.ToList();
 
@@ -91,7 +84,7 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
                     new UpdateCommand("City", () => { dbBook.City = BookHelper.CitySet(); }),
                     new UpdateCommand("Authors", () => {
                         var rawAuthors = BookHelper.AuthorsSet(existingAuthors);
-                        if (rawAuthors == null) return; 
+                        if (rawAuthors == null) return;
                         dbBook.Authors.Clear();
                         foreach (var author in rawAuthors)
                         {
@@ -120,21 +113,22 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
                         command.Action.Invoke();
                     }
                 }
-
-                context.SaveChanges();
-            }
+            });
 
             Console.Clear();
-            "Book changes successfully saved to database!".WriteLineSuccess();
-            Console.ReadKey(true);
+            if (isUpdated)
+                "Book changes successfully saved to database!".WriteLineSuccess();
+            else
+                "Error: Book not found or already deleted.".WriteLineError();
 
+            Console.ReadKey(true);
 
         }
 
         [MenuAction("Remove", 0, "Removes existing book(s) from Library")]
         public void Remove()
         {
-            var selectedBook = BookHelper.GetBookFromMenu(null, "Select Book you want to REMOVE");
+            var selectedBook = BookHelper.FindBook(null, "Select Book you want to REMOVE");
 
             if (selectedBook == null) return;
 
@@ -148,20 +142,13 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
             var key = Console.ReadKey(true).Key;
             if (key == ConsoleKey.Y)
             {
-                using (var context = new LibraryContext(DbConfig.Options))
-                {
-                    var bookToDelete = context.Books.Find(selectedBook.Id);
-                    if (bookToDelete != null)
-                    {
-                        context.Books.Remove(bookToDelete);
-                        context.SaveChanges();
-                        $"\nBook '{selectedBook.Name}' was successfully deleted!".WriteLineSuccess();
-                    }
-                    else
-                    {
-                        "\nError: Book was already removed by another session.".WriteLineError();
-                    }
-                }
+                bool isDeleted = BookHelper.Remove(selectedBook);
+
+                if (isDeleted) 
+                    $"\nBook '{selectedBook.Name}' was successfully deleted!".WriteLineSuccess();
+                else 
+                    "\nError: Book was already removed by another session.".WriteLineError();
+               
             }
             else
             {

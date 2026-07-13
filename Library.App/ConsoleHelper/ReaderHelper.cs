@@ -1,5 +1,6 @@
 ﻿using Library.DAL;
 using Library.DAL.Models;
+using Library.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.App.ConsoleHelper
@@ -9,12 +10,12 @@ namespace Library.App.ConsoleHelper
         /// <summary>
         /// Requests a REQUIRED reader's first name.
         /// </summary>
-        public static string? SetName() => BaseHelper.GetString("Write your new Name: ", "Name cannot be empty!");
+        public static string SetName() => BaseHelper.GetString("Write your new Name: ", "Name cannot be empty!");
 
         /// <summary>
         /// Requests a REQUIRED reader's last name.
         /// </summary>
-        public static string? SetLastName() => BaseHelper.GetString("Write your new LastName: ", "LastName cannot be empty!");
+        public static string SetLastName() => BaseHelper.GetString("Write your new LastName: ", "LastName cannot be empty!");
 
         /// <summary>
         /// Requests an OPTIONAL reader's email address.
@@ -52,28 +53,63 @@ namespace Library.App.ConsoleHelper
         /// <summary>
         /// Requests a REQUIRED password from the user.
         /// </summary>
-        public static string? SetPassword()
+        public static string? SetPassword() => BaseHelper.GetString("Write your new Password: ", "Password cannot be empty!");
+
+        /// <summary>
+        /// Requests a REQUIRED reader's document type.
+        /// </summary>
+        public static DocumentType SetDocumentType()
         {
-            //  To do...
-            return BaseHelper.GetString("Write your new Password: ", "Password cannot be empty!");
+            var documentSelector = new HelpMenu<DocumentType>("Select identity confirmation document", Enum.GetValues<DocumentType>());
+            return documentSelector.Select();
         }
+
+        /// <summary>
+        /// Requests a REQUIRED reader's document number.
+        /// </summary>
+        public static string SetDocumentNumber() => BaseHelper.GetString("Write your Document number: ", "Document number cannot be empty!");
 
         /// <summary>
         /// Atomically saves a fully prepared Reader entity into the database.
         /// </summary>
-        public static void AddReader(Reader reader)
+        public static void Add(Reader reader)
         {
-            try
+            using var context = new LibraryContext(DbConfig.Options);
+            context.Readers.Add(reader);
+            context.SaveChanges(); 
+        }
+        
+        /// <summary>
+        /// Updates a reader entity in the database by executing a custom modification action within a secure context.
+        /// </summary>
+        /// <param name="readerId">The identifier of the reader to update.</param>
+        /// <param name="updateAction">The delegate containing specific property modifications.</param>
+        /// <returns><c>true</c> if the reader was found and successfully updated; otherwise, <c>false</c>.</returns>
+        public static bool Update(int readerId, Action<Reader, LibraryContext> updateAction)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            var dbReader = context.Readers.FirstOrDefault(b => b.Id == readerId);
+
+            if (dbReader == null) return false;
+
+            updateAction.Invoke(dbReader, context);
+
+            context.SaveChanges();
+            return true;
+        }
+        public static bool Remove(Reader reader)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+            var readerToDelete = context.Readers.Find(reader.Id);
+            if (readerToDelete != null)
             {
-                using var context = new LibraryContext(DbConfig.Options);
-                context.Readers.Add(reader);
-                context.SaveChanges(); // EF Core executes TPT transaction under the hood [0.5]
+                context.Readers.Remove(readerToDelete);
+                context.SaveChanges();
+                $"\nReader '{reader.Name}' was successfully deleted!".WriteLineSuccess();
+                return true;
             }
-            catch (Exception ex)
-            {
-                $"Critical Error during database save: {ex.Message}".WriteLineError();
-                Console.ReadKey(true);
-            }
+            return false;
         }
 
         /// <summary>
@@ -81,10 +117,10 @@ namespace Library.App.ConsoleHelper
         /// </summary>
         /// <param name="toSearchText">What text you see to search</param>
         /// <param name="toSelectText">What text you see to select</param>
-        public static Reader? GetReader(string? toSearchText = null, string? toSelectText = null/*List<Reader> existingReaders*/)
+        public static Reader? FindReader(string? toSearchText = null, string? toSelectText = null/*List<Reader> existingReaders*/)
         {
             string? searchText = (toSearchText ?? "Write Reader Name or Last Name to issue: ").Read(ConsoleColor.Yellow);
-            List<Reader> existingReaders = GetReaders(searchText);
+            List<Reader> existingReaders = FindReaders(searchText);
             
             if (existingReaders == null || existingReaders.Count == 0)
             {
@@ -107,7 +143,7 @@ namespace Library.App.ConsoleHelper
 
             return readersDictionary[selectedKey];
         }
-        public static List<Reader> GetReaders(string? toSearch = null)
+        public static List<Reader> FindReaders(string? toSearch = null)
         {
             using var context = new LibraryContext(DbConfig.Options);
             var query = context.Readers.AsNoTracking();
@@ -121,5 +157,6 @@ namespace Library.App.ConsoleHelper
                     ).ToList();
 
         }
+
     }
 }

@@ -53,10 +53,10 @@ namespace Library.App.ConsoleHelper
 
         public static void BorrowBook()
         {
-            Book? selectedBook = GetBookFromMenu();
+            Book? selectedBook = FindBook();
             if (selectedBook == null) return;
 
-            Reader? selectedReader = ReaderHelper.GetReader();
+            Reader? selectedReader = ReaderHelper.FindReader();
             if (selectedReader == null) return;
 
             ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
@@ -64,7 +64,7 @@ namespace Library.App.ConsoleHelper
 
         public static void BorrowBook(Reader currentReader)
         {
-            Book? selectedBook = GetBookFromMenu();
+            Book? selectedBook = FindBook();
             if (selectedBook == null) return;
 
             ExecuteBorrowTransaction(currentReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
@@ -78,7 +78,7 @@ namespace Library.App.ConsoleHelper
                 return;
             }
 
-            Reader? selectedReader = ReaderHelper.GetReader();
+            Reader? selectedReader = ReaderHelper.FindReader();
             if (selectedReader == null) return;
 
             ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
@@ -129,7 +129,7 @@ namespace Library.App.ConsoleHelper
             Console.ReadKey(true);
         }
 
-        public static Book? GetBookFromMenu(string? toSearchText = null, string? toSelectText = null)
+        public static Book? FindBook(string? toSearchText = null, string? toSelectText = null)
         {
             string? toSearch = (toSearchText ?? "Write Book Name or Author to issue: ").Read(ConsoleColor.Yellow);
             List<Book> foundBooks = FindBooks(toSearch);
@@ -150,6 +150,40 @@ namespace Library.App.ConsoleHelper
                     b.Name.Contains(toSearch) ||
                     b.Authors.Any(a => a.Name.Contains(toSearch) || a.LastName.Contains(toSearch))).ToList();
 
+        }
+        /// <summary>
+        /// Updates a book entity in the database by executing a custom modification action within a secure context.
+        /// </summary>
+        /// <param name="bookId">The identifier of the book to update.</param>
+        /// <param name="updateAction">The delegate containing specific property modifications.</param>
+        /// <returns><c>true</c> if the book was found and successfully updated; otherwise, <c>false</c>.</returns>
+        public static bool Update(int bookId, Action<Book, LibraryContext> updateAction)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            var dbBook = context.Books.Include(b => b.Authors)
+                                      .Include(b => b.PublisherType)
+                                      .FirstOrDefault(b => b.Id == bookId);
+
+            if (dbBook == null) return false;
+
+            updateAction.Invoke(dbBook, context);
+
+            context.SaveChanges();
+            return true;
+        }
+        public static bool Remove(Book book)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+            var bookToDelete = context.Books.Find(book.Id);
+            if (bookToDelete != null)
+            {
+                context.Books.Remove(bookToDelete);
+                context.SaveChanges();
+                $"\nBook '{book.Name}' was successfully deleted!".WriteLineSuccess();
+                return true;
+            }
+            return false;
         }
     }
 }
