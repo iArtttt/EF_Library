@@ -1,10 +1,38 @@
-﻿namespace Library.App.ConsoleHelper
+﻿using Library.DAL;
+using Library.Shared.Abstractions;
+
+namespace Library.App.ConsoleHelper
 {
     /// <summary>
     /// Base helper class that manages core user input operations with built-in validation and formatting.
     /// </summary>
     public static class BaseHelper
     {
+        /// <summary>
+        /// Validates user credentials and retrieves the fully typed user entity (Librarian or Reader) from the database.
+        /// </summary>
+        /// <param name="login">The login name entered by the user.</param>
+        /// <param name="password">The plain-text password entered by the user.</param>
+        /// <returns>A fully typed <see cref="User"/> instance if authentication succeeds; otherwise, <c>null</c>.</returns>
+        public static User? Authenticate(string? login, string? password)
+        {
+            if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return null;
+
+            using var context = new LibraryContext(DbConfig.Options);
+            
+            var user = context.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            if (user == null) return null;
+
+            var librarian = context.Librarians.FirstOrDefault(l => l.Id == user.Id);
+            if (librarian != null) return librarian;
+
+            var reader = context.Readers.FirstOrDefault(r => r.Id == user.Id);
+            if (reader != null) return reader;
+
+            return user;
+
+        }
+
         /// <summary>
         /// Requests an OPTIONAL string input from the user. The user can skip this by pressing Enter.
         /// </summary>
