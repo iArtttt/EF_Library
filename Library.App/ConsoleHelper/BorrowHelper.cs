@@ -1,5 +1,6 @@
 ﻿using Library.DAL;
 using Library.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.App.ConsoleHelper
 {
@@ -8,6 +9,82 @@ namespace Library.App.ConsoleHelper
     /// </summary>
     public static class BorrowHelper
     {
+        /// <summary>
+        /// Retrieves all active loans that have exceeded their return deadline.
+        /// </summary>
+        public static List<BorrowedBook> GetActiveDebtors()
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            return context.BorrowedBooks
+                .Include(b => b.Book)
+                .Include(b => b.Reader)
+                .Where(b => !b.IsReturned && b.ToReturn < DateTime.Now) 
+                .AsNoTracking()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Retrieves the entire historical log of all book loans ever issued in the library.
+        /// </summary>
+        public static List<BorrowedBook> GetGlobalLoanHistory()
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            return context.BorrowedBooks
+                .Include(b => b.Book)
+                .Include(b => b.Reader)
+                .OrderByDescending(b => b.Taken) 
+                .AsNoTracking()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Retrieves the entire borrowing history for the specified reader, including current and past loans.
+        /// </summary>
+        /// <param name="reader">The reader entity whose loan history is being requested.</param>
+        /// <returns>A list of <see cref="BorrowedBook"/> records associated with the reader.</returns>
+        public static List<BorrowedBook> GetBorrowedBooks(this Reader reader)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            return context.BorrowedBooks
+                .Include(b => b.Book)
+                .Include(b => b.Reader)
+                .Where(b => b.ReaderId == reader.Id)
+                .AsNoTracking()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Executes an atomic database transaction to return a borrowed book back to the library inventory.
+        /// </summary>
+        /// <param name="loanId">The primary key ID of the BorrowedBook record to update.</param>
+        /// <returns><c>true</c> if the book was successfully returned; <c>false</c> if the record was not found or already returned.</returns>
+        public static bool ReturnBook(int loanId)
+        {
+            using var context = new LibraryContext(DbConfig.Options);
+
+            // Fetch the tracking entity with its concrete Book reference
+            var loan = context.BorrowedBooks.Include(l => l.Book).FirstOrDefault(l => l.Id == loanId);
+
+            if (loan == null || loan.IsReturned)
+                return false;
+
+            // Update the transaction properties
+            loan.IsReturned = true;
+
+            // Safely increase the inventory count back on the shelves
+            if (loan.Book != null)
+            {
+                loan.Book.Count++;
+            }
+
+            context.SaveChanges();
+            return true;
+        }
+
+
         /// <summary>
         /// Launches a complete interactive borrowing wizard by requesting both the book and the reader from scratch.
         /// </summary>
