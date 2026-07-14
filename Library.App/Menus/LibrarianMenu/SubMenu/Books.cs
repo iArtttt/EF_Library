@@ -129,17 +129,14 @@ namespace Library.App.Menus.LibrarianMenu.SubMenu
         public void Remove()
         {
             var selectedBook = BookHelper.FindBook(null, "Select Book you want to REMOVE");
-
             if (selectedBook == null) return;
 
-            var genres = selectedBook.Genre.ToString();
-            var authors = string.Join(", ", selectedBook.Authors.Select(a => $"{a.SecondName ?? $"{a.Name} {a.LastName}"}"));
-            
-            $"Name: {selectedBook.Name} ".WriteLineInfo();
-            $"Genre(s): {genres} ".WriteLineInfo();
-            $"Author(s): {authors} ".WriteLineInfo();
+            selectedBook.Information();
+
+            string.Empty.PadRight(Console.BufferWidth - 1, '_').WriteLineUnknownDark();
             "Is this correct book? (Press 'Y' to delete, any other key to cancel)".WriteLineError();
             var key = Console.ReadKey(true).Key;
+            
             if (key == ConsoleKey.Y)
             {
                 bool isDeleted = BookHelper.Remove(selectedBook);

@@ -65,13 +65,11 @@ namespace Library.App.ConsoleHelper
         {
             using var context = new LibraryContext(DbConfig.Options);
 
-            // Fetch the tracking entity with its concrete Book reference
             var loan = context.BorrowedBooks.Include(l => l.Book).FirstOrDefault(l => l.Id == loanId);
 
             if (loan == null || loan.IsReturned)
                 return false;
 
-            // Update the transaction properties
             loan.IsReturned = true;
 
             // Safely increase the inventory count back on the shelves
@@ -128,7 +126,7 @@ namespace Library.App.ConsoleHelper
                 return;
             }
 
-            Reader? selectedReader = ReaderHelper.FindReader();
+            Reader? selectedReader = ReaderHelper.FindReader(null, "Which of them want to take the book?");
             if (selectedReader == null) return;
 
             ExecuteBorrowTransaction(selectedReader.Id, selectedBook.Id, selectedBook.Name, selectedBook.ReturnedDays);
