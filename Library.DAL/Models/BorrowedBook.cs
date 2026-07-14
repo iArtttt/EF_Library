@@ -6,10 +6,6 @@ namespace Library.DAL.Models
     {
         public int Id { get; set; }
 
-        public int LibrarianId { get; set; }
-        
-        public Librarian Librarian { get; set; } = null!;
-
         public int BookId { get; set; }
         
         public Book Book { get; set; } = null!;

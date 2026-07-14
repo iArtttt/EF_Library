@@ -1,4 +1,4 @@
-﻿using Library.App.Menus;
+﻿using Library.App.Menus.EntityMenu;
 
 namespace Library.App
 {
@@ -6,6 +6,7 @@ namespace Library.App
     {
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             Menu.Start();
         }
 

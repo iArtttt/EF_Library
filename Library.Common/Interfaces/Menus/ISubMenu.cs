@@ -1,7 +1,7 @@
 ﻿namespace Library.Shared.Interfaces.Menus
 {
-    public interface ISubMenu : IMenu
+    public interface ISubMenu : IMenuElement
     {
-        public IMenu Menu { get; }
+        public IEnumerable<IMenuElement> MenuElements { get; }
     }
 }
