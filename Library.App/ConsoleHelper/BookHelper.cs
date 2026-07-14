@@ -7,7 +7,25 @@ namespace Library.App.ConsoleHelper
 {
     public static class BookHelper
     {
+        /// <summary>
+        /// Extension method to display a detailed information card for the specified book in the console.
+        /// </summary>
+        /// <param name="book">The book entity whose details are to be displayed.</param>
+        public static void Information(this Book book)
+        {
+            var genres = book.Genre.ToString();
+            string authors = string.Join(", ", book.Authors.Select(a => a.SecondName ?? $"{a.LastName} {a.Name}"));
 
+            $"\t===[ Book Information ]===: {book.Name}".WriteLineSuccess();
+            string.Empty.PadRight(Console.BufferWidth - 1, '-').WriteLineUnknownDark();
+            $"Name: {book.Name}".WriteLineInfo();
+            $"Genre: {genres}".WriteLineInfo();
+            $"Author(s): {authors}".WriteLineInfo();
+            $"Country: {book.Country ?? "-----"}".WriteLineInfo();
+            $"City: {book.City ?? "-----"}".WriteLineInfo();
+            $"Count: {book.Count}".WriteLineInfo();
+            
+        }
         public static string? BookNameSet() => BaseHelper.GetString("Write the new book Name: ");
         public static string? CountrySet() => BaseHelper.GetString("Write Country where book from: ");
         public static string? CitySet() => BaseHelper.GetString("Write City where book from: ");

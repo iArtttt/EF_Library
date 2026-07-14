@@ -109,11 +109,11 @@ namespace Library.App.Menus.EntityMenu
             var existingMenuIndex = valuesList.FindIndex(v => v != null && v.GetType() == typeof(Menu));
 
             if (existingMenuIndex != -1)
-                valuesList[existingMenuIndex] = newMenu; // Обновляем ссылку, если это вложенное меню
+                valuesList[existingMenuIndex] = newMenu; 
             else
-                valuesList.Add(newMenu); // Добавляем, если его еще не было
+                valuesList.Add(newMenu); 
 
-            var updatedValues = valuesList.ToArray(); // Создаем обновленный массив параметров
+            var updatedValues = valuesList.ToArray(); 
 
             var obj = Activator.CreateInstance(typeMenu);
 
